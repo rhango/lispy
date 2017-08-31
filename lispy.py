@@ -1,0 +1,46 @@
+globals().update({'set_': (lambda vars:
+    globals().update(vars))})
+
+set_({'_': (lambda func, *args, **kwargs:
+    func(*args, **kwargs))})
+
+_(set_, {'op': _(__import__, 'operator')})
+_(set_, {'itertools': _(__import__, 'itertools')})
+
+_(set_, {'del_': (lambda *keys:
+    [_(_(globals).pop, key) for key in keys])})
+
+_(set_, {'nil': (lambda: None)})
+
+_(set_, {'if_': (lambda p, thn, els:
+    _(thn) if p else _(els))})
+
+_(set_, {'cond': (lambda *cases:
+    _(_(next, (case[1] for case in cases if case[0]))))})
+
+_(set_, {'prog': (lambda *procs:
+    [_(proc) for proc in procs])})
+
+_(set_, {'let': (lambda vars, *procs:
+    _(prog,
+        (lambda: _(set_, vars)),
+        *procs,
+        (lambda: _(del_, *_(vars.keys)))
+    )[1:-1])})
+
+_(set_, {'while_': (lambda p, *procs:
+    [_(prog, *procs) for dummy in
+        _(itertools.takewhile, (lambda dummy: _(p)), _(itertools.repeat, None))])})
+
+_(set_, {'dolist': (lambda var, list, *procs:
+    _(prog,
+        (lambda: [
+            _(prog,
+                (lambda: _(set_, {var: elm})),
+                *procs
+            )[1:]
+        for elm in list]),
+        (lambda: _(del_, var))
+    )[0])})
+
+_(set_, {'lispy': _(_(open, 'lispy.py', 'r').read)})
