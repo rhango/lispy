@@ -1,6 +1,6 @@
 (
-    globals().update({'set_': (lambda vars:
-        globals().update(vars))}),
+    globals().update({'set_': (lambda vars_:
+        globals().update(vars_))}),
 
     set_({'_': (lambda func, *args, **kwargs:
         func(*args, **kwargs))}),
@@ -10,8 +10,8 @@
 
     _(set_, {'nil': (lambda: None)}),
 
-    _(set_, {'if_': (lambda p, thn, els:
-        _(thn) if p else _(els))}),
+    _(set_, {'if_': (lambda p, then, else_:
+        _(then) if p else _(else_))}),
 
     _(set_, {'cond': (lambda *cases:
         _(_(next, (case[1] for case in cases if case[0]))))}),
@@ -19,21 +19,21 @@
     _(set_, {'prog': (lambda *procs:
         [_(proc) for proc in procs])}),
 
-    _(set_, {'let': (lambda vars, *procs:
+    _(set_, {'let': (lambda vars_, *procs:
         _(prog,
-            (lambda: _(set_, vars)),
+            (lambda: _(set_, vars_)),
             *procs,
-            (lambda: _(del_, *_(vars.keys)))
+            (lambda: _(del_, *_(vars_.keys)))
         )[1:-1])}),
 
-    _(set_, {'dolist': (lambda var, list, *procs:
+    _(set_, {'dolist': (lambda var, list_, *procs:
         _(prog,
             (lambda: [
                 _(prog,
                     (lambda: _(set_, {var: elm})),
                     *procs
                 )[1:]
-            for elm in list]),
+            for elm in list_]),
             (lambda: _(del_, var))
         )[0])}),
 

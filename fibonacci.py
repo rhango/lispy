@@ -12,6 +12,5 @@
         _(print, _(fib, 99)))}),
 
     _(if_, _(op.eq, __name__, '__main__'),
-        main,
-        nil)
+        main, nil)
 )
