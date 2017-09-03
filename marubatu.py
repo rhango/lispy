@@ -6,21 +6,23 @@
     _(set_, {'np': _(__import__, 'numpy')}),
 
 
-    _(set_, {'MaruBatu': _(enum.IntEnum, 'MaruBatu', {
-        'NULL': 0,
-        'MARU': 1,
-        'BATU': -1,
-    })}),
+    (
+        _(set_, {'MaruBatu': _(enum.IntEnum, 'MaruBatu', {
+            'NULL': 0,
+            'MARU': 1,
+            'BATU': -1,
+        })}),
 
-    _(setattr, MaruBatu, '__str__', (lambda self:
-        _(cond,
-            (_(op.is_, self, MaruBatu.MARU), (lambda: 'o')),
-            (_(op.is_, self, MaruBatu.BATU), (lambda: 'x')),
-            (True, (lambda: ' '))
-        )[-1])),
+        _(setattr, MaruBatu, '__str__', (lambda self:
+            _(cond,
+                (_(is_, self, MaruBatu.MARU), (lambda: 'o')),
+                (_(is_, self, MaruBatu.BATU), (lambda: 'x')),
+                (True, (lambda: ' '))
+            )[-1])),
 
-    _(setattr, MaruBatu, 'get_opponent', (lambda self:
-        _(MaruBatu, _(op.neg, self)))),
+        _(setattr, MaruBatu, 'get_opponent', (lambda self:
+            _(MaruBatu, _(neg, self)))),
+    ),
 
 
     _(set_, {'State': _(enum.Enum, 'State', {
@@ -43,7 +45,7 @@
             )[0]),
 
         'can_put': (lambda self, place:
-            _(op.eq, self.board[place], MaruBatu.NULL)),
+            _(eq, self.board[place], MaruBatu.NULL)),
 
         'put': (lambda self, place:
             _(if_, _(self.can_put, place),
@@ -54,7 +56,7 @@
                 (lambda: False))),
 
         'exist_null_place': (lambda self:
-            _(op.not_, _(self.board.all))),
+            _(not_, _(self.board.all))),
 
         'check_win': (lambda self, marubatu:
             _((lambda board:
@@ -64,7 +66,7 @@
                     _(_(board.diagonal).all),
                     _(_(board[::-1,:].diagonal).all)))
             ), **{
-                'board': _(op.eq, self.board, marubatu)
+                'board': _(eq, self.board, marubatu)
             })),
 
         'get_state': (lambda self:
@@ -87,18 +89,18 @@
                 end="\n\n")),
 
         'start': (lambda self:
-            _(self.process_turn)),
+            _(self.move_check_state_process)),
 
-        'process_turn': (lambda self:
+        'move_check_state_process': (lambda self:
             _((lambda game_state:
                 _(prog,
                     (lambda: _(self.render)),
                     (lambda: _(cond,
-                        (_(op.is_, game_state, State.PLAYING), 
-                            (lambda: _(self.player[self.turn].tell_your_turn))),
-                        (_(op.is_, game_state, State.MARU_WIN),
+                        (_(is_, game_state, State.PLAYING), 
+                            (lambda: _(self.player[self.turn].move_think_process))),
+                        (_(is_, game_state, State.MARU_WIN),
                             (lambda: _(print, "Maru win!!\n"))),
-                        (_(op.is_, game_state, State.BATU_WIN),
+                        (_(is_, game_state, State.BATU_WIN),
                             (lambda: _(print, "Batu win!!\n"))),
                         (True, (lambda: _(print, "Draw!!\n")))
                     )[-1])
@@ -107,12 +109,13 @@
                 'game_state': _(self.get_state)
             })),
 
-        'tell_where_put': (lambda self, place:
-            _(prog,
-                (lambda: _(self.put, place)),
-                (lambda: _(setattr, self, 'turn', _(self.turn.get_opponent))),
-                (lambda: _(self.process_turn))
-            )[-1])
+        'move_put_process': (lambda self, place:
+            _(if_, _(self.put, place),
+                (lambda: _(prog,
+                    (lambda: _(setattr, self, 'turn', _(self.turn.get_opponent))),
+                    (lambda: _(self.move_check_state_process))
+                )[-1]),
+                (lambda: _(self.player[self.turn].move_think_process))))
     })}),
 
 
@@ -126,23 +129,35 @@
                 (lambda: self)
             )[-1]),
 
-        'tell_your_turn': _(abc.abstractmethod, (lambda self: None))
+        'move_think_process': _(abc.abstractmethod, (lambda self: None))
     })}),
 
 
     _(set_, {'Human': _(type, 'Human', (Player,), {
-        '__init__': (lambda self: None),
+        '__init__': (lambda self:
+            _(setattr, self, 'is_my_turn', False)),
 
-        'tell_your_turn': (lambda self:
-            _(print, "Your turn!\n"))
+        'move_think_process': (lambda self:
+            _(prog,
+                (lambda: _(print, "Your turn!\n")),
+                (lambda: _(setattr, self, 'is_my_turn', True))
+            )[-1]),
+
+        'put': (lambda self, place:
+            _(if_, self.is_my_turn,
+                (lambda: _(prog,
+                    (lambda: _(setattr, self, 'is_my_turn', False)),
+                    (lambda: _(self.game.move_put_process, place))
+                )[-1]),
+                nil))
     })}),
 
 
     _(set_, {'Random': _(type, 'Random', (Player,), {
         '__init__': (lambda self: None),
 
-        'tell_your_turn': (lambda self:
-            _(self.game.tell_where_put,
+        'move_think_process': (lambda self:
+            _(self.game.move_put_process,
                 _((lambda null_place:
                     _((lambda idx:
                         (null_place[0][idx], null_place[1][idx])
@@ -150,9 +165,12 @@
                         'idx': _(np.random.randint, null_place[0].size)
                     })
                 ), **{
-                    'null_place': _(np.where, _(op.eq, self.game.board, MaruBatu.NULL))
+                    'null_place': _(np.where, _(eq, self.game.board, MaruBatu.NULL))
                 })))
     })}),
+
+
+    _(set_, {'marubatu': _(code, "marubatu.py")}),
 
 
     _(set_, {'main': (lambda:
@@ -160,11 +178,11 @@
                 'is_end': False,
                 'end': (lambda: _(set_, {'is_end': True}))
             },
-            (lambda: _(while_, (lambda: _(op.not_, is_end)),
-                (lambda: _(print, "in :", end="")),
-                (lambda: _(print, "out:", _(eval, _(input)), end="\n\n"))))))}),
+            (lambda: _(while_, (lambda: _(not_, is_end)),
+                (lambda: _(print, "In :", end=" ")),
+                (lambda: _(print, "Out:", _(eval, _(input)), end="\n\n"))))))}),
 
 
-    _(if_, _(op.eq, __name__, '__main__'),
+    _(if_, _(eq, __name__, '__main__'),
         main, nil)
 )

@@ -8,10 +8,27 @@
 
 
     _(set_, {'del_': (lambda *keys:
-        [_(_(globals).pop, key) for key in keys])}),
+        _((lambda g_vars:
+            [_(g_vars.pop, key) for key in keys]
+        ), **{
+            'g_vars': _(globals)
+        }))}),
 
 
-    _(set_, {'op': _(__import__, 'operator')}),
+    _(set_, {'import_all': (lambda mod_name:
+        _(set_,
+            _((lambda mod:
+                _((lambda vals:
+                    {key: vals[key] for key in mod.__all__}
+                ), **{
+                    'vals': _(vars, mod)
+                })
+            ), **{
+                'mod': _(__import__, mod_name)
+            })))}),
+
+
+    _(import_all, 'operator'),
 
 
     _(set_, {'nil': (lambda: None)}),
@@ -22,11 +39,21 @@
 
 
     _(set_, {'let': (lambda vars_, *procs:
-        _(prog,
-            (lambda: _(set_, vars_)),
-            *procs,
-            (lambda: _(del_, *_(vars_.keys)))
-        )[1:-1])}),
+        _((lambda bak_vars:
+            _(prog,
+                (lambda: _(set_, vars_)),
+                *procs,
+                (lambda: _(del_, *_(vars_.keys))),
+                (lambda: _(set_, bak_vars))
+            )[1:-2]
+        ), **{
+            'bak_vars':
+                _((lambda g_vars:
+                    {key: g_vars[key] for key in vars_ if key in g_vars}
+                ), **{
+                    'g_vars': _(globals)
+                })
+        }))}),
 
 
     _(set_, {'if_': (lambda p, then, else_:
@@ -39,14 +66,13 @@
 
 
     _(set_, {'dolist': (lambda var, list_, *procs:
-        _(prog,
+        _(let, {var: None},
             (lambda: [
                 _(prog,
                     (lambda: _(set_, {var: elm})),
                     *procs
                 )[1:]
-            for elm in list_]),
-            (lambda: _(del_, var))
+            for elm in list_])
         )[0])}),
 
 
