@@ -97,7 +97,7 @@
                 _(prog,
                     (lambda: _(self.render)),
                     (lambda: _(cond,
-                        (_(is_, game_state, State.PLAYING), 
+                        (_(is_, game_state, State.PLAYING),
                             (lambda: _(self.player[self.turn].shift_to_think_process))),
                         (_(is_, game_state, State.MARU_WIN),
                             (lambda: _(print, "Info: Maru win"))),
