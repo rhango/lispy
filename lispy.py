@@ -16,19 +16,18 @@
 
 
     _(set_, {'import_all': (lambda mod_name:
-        _(set_,
-            _((lambda mod:
-                _((lambda vals:
-                    {key: vals[key] for key in mod.__all__}
-                ), **{
-                    'vals': _(vars, mod)
-                })
+        _((lambda mod:
+            _((lambda vals:
+                {key: vals[key] for key in mod.__all__}
             ), **{
-                'mod': _(__import__, mod_name)
-            })))}),
+                'vals': _(vars, mod)
+            })
+        ), **{
+            'mod': _(__import__, mod_name)
+        }))}),
 
 
-    _(import_all, 'operator'),
+    _(set_, _(import_all, 'operator')),
 
 
     _(set_, {'nil': (lambda: None)}),
@@ -39,17 +38,17 @@
 
 
     _(set_, {'let': (lambda vars_, *procs:
-        _((lambda bak_vars:
+        _((lambda held_vars:
             _(prog,
                 (lambda: _(set_, vars_)),
                 *procs,
                 (lambda: _(del_, *_(vars_.keys))),
-                (lambda: _(set_, bak_vars))
+                (lambda: _(set_, held_vars))
             )[1:-2]
         ), **{
-            'bak_vars':
+            'held_vars':
                 _((lambda g_vars:
-                    {key: g_vars[key] for key in vars_ if key in g_vars}
+                    {key: g_vars[key] for key in vars_ if _(contains, g_vars, key)}
                 ), **{
                     'g_vars': _(globals)
                 })
@@ -100,9 +99,19 @@
         [_(prog, *procs) for dummy in _(WhileIter, p)])}),
 
 
-    _(set_, {'code': (lambda file_name:
-        _(compile, _(_(open, file_name, 'r').read), file_name, 'eval'))}),
+    _(set_, {'imported_mods': _(set)}),
 
 
-    _(set_, {'lispy': _(code, "lispy.py")})
+    _(set_, {'code': (lambda name:
+        _(if_, _(contains, imported_mods, name),
+            (lambda: 'None'),
+            (lambda: _(prog,
+                (lambda: _(imported_mods.add, name)),
+                (lambda: _(compile,
+                    _(_(open, _(__import__, name).__file__, 'r').read),
+                    name, 'eval'))
+            )[-1])))}),
+
+
+    _(set_, {'lispy': (lambda: _(code, __name__))})
 )

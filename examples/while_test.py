@@ -1,5 +1,6 @@
 (
-    eval(__import__('lispy').lispy),
+    __import__('sys').path.append('../'),
+    eval(__import__('lispy').lispy()),
 
 
     _(set_, {'main': (lambda:

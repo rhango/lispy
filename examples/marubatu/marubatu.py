@@ -1,5 +1,6 @@
 (
-    eval(__import__('lispy').lispy),
+    __import__('sys').path.append('../../'),
+    eval(__import__('lispy').lispy()),
 
     _(set_, {'enum': _(__import__, 'enum')}),
     _(set_, {'abc': _(__import__, 'abc')}),
@@ -170,7 +171,7 @@
     })}),
 
 
-    _(set_, {'marubatu': _(code, "marubatu.py")}),
+    _(set_, {'marubatu': (lambda: _(code, __name__))}),
 
 
     _(set_, {'main': (lambda:
