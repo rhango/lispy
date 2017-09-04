@@ -90,33 +90,36 @@
                 end="\n\n")),
 
         'start': (lambda self:
-            _(self.move_check_state_process)),
+            _(self.shift_to_check_state_process)),
 
-        'move_check_state_process': (lambda self:
+        'shift_to_check_state_process': (lambda self:
             _((lambda game_state:
                 _(prog,
                     (lambda: _(self.render)),
                     (lambda: _(cond,
                         (_(is_, game_state, State.PLAYING), 
-                            (lambda: _(self.player[self.turn].move_think_process))),
+                            (lambda: _(self.player[self.turn].shift_to_think_process))),
                         (_(is_, game_state, State.MARU_WIN),
-                            (lambda: _(print, "Maru win!!\n"))),
+                            (lambda: _(print, "Info: Maru win"))),
                         (_(is_, game_state, State.BATU_WIN),
-                            (lambda: _(print, "Batu win!!\n"))),
-                        (True, (lambda: _(print, "Draw!!\n")))
+                            (lambda: _(print, "Info: Batu win"))),
+                        (True, (lambda: _(print, "Info: Draw")))
                     )[-1])
                 )[-1]
             ), **{
                 'game_state': _(self.get_state)
             })),
 
-        'move_put_process': (lambda self, place:
+        'shift_to_put_process': (lambda self, place:
             _(if_, _(self.put, place),
                 (lambda: _(prog,
                     (lambda: _(setattr, self, 'turn', _(self.turn.get_opponent))),
-                    (lambda: _(self.move_check_state_process))
+                    (lambda: _(self.shift_to_check_state_process))
                 )[-1]),
-                (lambda: _(self.player[self.turn].move_think_process))))
+                (lambda: _(prog,
+                    (lambda: _(print, "Error: There is already put")),
+                    (lambda: _(self.player[self.turn].shift_to_think_process))
+                )[-1])))
     })}),
 
 
@@ -130,7 +133,7 @@
                 (lambda: self)
             )[-1]),
 
-        'move_think_process': _(abc.abstractmethod, (lambda self: None))
+        'shift_to_think_process': _(abc.abstractmethod, (lambda self: None))
     })}),
 
 
@@ -138,27 +141,31 @@
         '__init__': (lambda self:
             _(setattr, self, 'is_my_turn', False)),
 
-        'move_think_process': (lambda self:
+        'shift_to_think_process': (lambda self:
             _(prog,
-                (lambda: _(print, "Your turn!\n")),
+                (lambda: _(print, "Info: Your turn")),
                 (lambda: _(setattr, self, 'is_my_turn', True))
             )[-1]),
 
         'put': (lambda self, place:
-            _(if_, self.is_my_turn,
-                (lambda: _(prog,
+            _(cond,
+                (_(or_,
+                    _(gt, _(abs, _(sub, place[0], 1)), 1),
+                    _(gt, _(abs, _(sub, place[1], 1)), 1)),
+                        (lambda: _(print, "Error: Argment points outside the board"))),
+                (self.is_my_turn,
                     (lambda: _(setattr, self, 'is_my_turn', False)),
-                    (lambda: _(self.game.move_put_process, place))
-                )[-1]),
-                nil))
+                    (lambda: _(self.game.shift_to_put_process, place))),
+                (True, (lambda: _(print, "Error: It is not your turn")))
+            )[-1])
     })}),
 
 
     _(set_, {'Random': _(type, 'Random', (Player,), {
         '__init__': (lambda self: None),
 
-        'move_think_process': (lambda self:
-            _(self.game.move_put_process,
+        'shift_to_think_process': (lambda self:
+            _(self.game.shift_to_put_process,
                 _((lambda null_place:
                     _((lambda idx:
                         (null_place[0][idx], null_place[1][idx])

@@ -4,10 +4,10 @@
 
     _(set_, {'main': (lambda:
         _(let, {
-                'is_end': False,
-                'end': (lambda: _(set_, {'is_end': True}))
+                'is_continue': True,
+                'end': (lambda: _(set_, {'is_continue': False}))
             },
-            (lambda: _(while_, (lambda: _(not_, is_end)),
+            (lambda: _(while_, (lambda: is_continue),
                 (lambda: _(print, "In :", end=" ")),
                 (lambda: _(print, "Out:", _(eval, _(input)), end="\n\n"))))))}),
 

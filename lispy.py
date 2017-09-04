@@ -48,7 +48,8 @@
         ), **{
             'held_vars':
                 _((lambda g_vars:
-                    {key: g_vars[key] for key in vars_ if _(contains, g_vars, key)}
+                    {key: g_vars[key]
+                        for key in vars_ if _(contains, g_vars, key)}
                 ), **{
                     'g_vars': _(globals)
                 })
