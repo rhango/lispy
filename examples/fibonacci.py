@@ -1,5 +1,5 @@
 (
-    __import__('sys').path.append('../'),
+    __import__('sys').path.append('..'),
     eval(__import__('lispy').lispy()),
 
     _(set_, {'lru_cache': _(__import__, 'functools').lru_cache}),
@@ -18,6 +18,5 @@
         _(print, _(fib, 60)))}),
 
 
-    _(if_, _(eq, __name__, '__main__'),
-        main, nil)
+    _(main)
 )

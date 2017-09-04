@@ -1,5 +1,5 @@
 (
-    __import__('sys').path.append('../../'),
+    __import__('sys').path.append('../..'),
     eval(__import__('lispy').lispy()),
 
     _(set_, {'enum': _(__import__, 'enum')}),
@@ -171,19 +171,5 @@
     })}),
 
 
-    _(set_, {'marubatu': (lambda: _(code, __name__))}),
-
-
-    _(set_, {'main': (lambda:
-        _(let, {
-                'is_end': False,
-                'end': (lambda: _(set_, {'is_end': True}))
-            },
-            (lambda: _(while_, (lambda: _(not_, is_end)),
-                (lambda: _(print, "In :", end=" ")),
-                (lambda: _(print, "Out:", _(eval, _(input)), end="\n\n"))))))}),
-
-
-    _(if_, _(eq, __name__, '__main__'),
-        main, nil)
+    _(set_, {'marubatu': (lambda: _(code, __name__))})
 )

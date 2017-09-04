@@ -99,18 +99,10 @@
         [_(prog, *procs) for dummy in _(WhileIter, p)])}),
 
 
-    _(set_, {'imported_mods': _(set)}),
-
-
     _(set_, {'code': (lambda name:
-        _(if_, _(contains, imported_mods, name),
-            (lambda: 'None'),
-            (lambda: _(prog,
-                (lambda: _(imported_mods.add, name)),
-                (lambda: _(compile,
-                    _(_(open, _(__import__, name).__file__, 'r').read),
-                    name, 'eval'))
-            )[-1])))}),
+        _(compile,
+            _(_(open, _(__import__, name).__file__, 'r').read),
+            name, 'eval'))}),
 
 
     _(set_, {'lispy': (lambda: _(code, __name__))})
