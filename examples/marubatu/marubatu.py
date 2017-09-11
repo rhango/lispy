@@ -92,7 +92,7 @@
         'start': (lambda self:
             _(self.goto_check_state_process)),
 
-        'goto_check_state_process': (lambda self:
+        'goto_check_state_process': _(_(TailCall), (lambda self:
             _((lambda game_state:
                 _(prog,
                     (lambda: _(self.render)),
@@ -108,9 +108,9 @@
                 )[-1]
             ), **{
                 'game_state': _(self.get_state)
-            })),
+            }))),
 
-        'goto_put_process': (lambda self, place:
+        'goto_put_process': _(_(TailCall), (lambda self, place:
             _(if_, _(self.put, place),
                 (lambda: _(prog,
                     (lambda: _(setattr, self, 'turn', _(self.turn.get_opponent))),
@@ -119,7 +119,7 @@
                 (lambda: _(prog,
                     (lambda: _(print, "Error: There is already put")),
                     (lambda: _(self.player[self.turn].goto_think_process))
-                )[-1])))
+                )[-1]))))
     })}),
 
 
@@ -164,7 +164,7 @@
     _(set_, {'Random': _(type, 'Random', (Player,), {
         '__init__': (lambda self: None),
 
-        'goto_think_process': (lambda self:
+        'goto_think_process': _(_(TailCall), (lambda self:
             _(self.game.goto_put_process,
                 _((lambda null_place:
                     _((lambda idx:
@@ -174,7 +174,7 @@
                     })
                 ), **{
                     'null_place': _(np.where, _(eq, self.game.board, MaruBatu.NULL))
-                })))
+                }))))
     })}),
 
 

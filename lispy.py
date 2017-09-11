@@ -100,6 +100,38 @@
         [_(prog, *procs) for dummy in _(WhileIter, p)])}),
 
 
+    _(set_, {'wraps': _(__import__, 'functools').wraps}),
+
+
+    _(set_, {'TailCall': _(type, 'TailCall', (object,), {
+        'CONTINUE': _(object),
+        'is_first_call': True,
+        'func': None,
+
+        '__init__': (lambda self: None),
+
+        '__call__': (lambda self, func:
+            _(_(wraps, func), (lambda *args, **kwargs:
+                _(prog,
+                    (lambda: _(setattr, TailCall, 'func', (lambda: _(func, *args, **kwargs)))),
+
+                    (lambda: _(if_, TailCall.is_first_call,
+                        (lambda: _(let, {'result': TailCall.CONTINUE},
+                            (lambda: _(setattr, TailCall, 'is_first_call', False)),
+
+                            (lambda: _(while_, (lambda: _(is_, result, TailCall.CONTINUE)),
+                                (lambda: _(set_, {'result': _(TailCall.func)})))),
+
+                            (lambda: _(setattr, TailCall, 'is_first_call', True)),
+                            (lambda: _(setattr, TailCall, 'func', None)),
+                            (lambda: result)
+                        )[-1]),
+
+                        (lambda: self.CONTINUE)))
+                )[-1])))
+    })}),
+
+
     _(set_, {'code': (lambda name:
         _(compile,
             _(_(open, _(__import__, name).__file__, 'r').read),
