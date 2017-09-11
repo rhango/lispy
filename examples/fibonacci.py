@@ -10,8 +10,7 @@
             (_(eq, n, 0), (lambda: 0)),
             (_(eq, n, 1), (lambda: 1)),
             (True, (lambda: _(add, _(fib, _(sub, n, 1)), _(fib, _(sub, n, 2)))))
-        )[-1]
-    ))}),
+        )[-1]))}),
 
 
     _(set_, {'main': (lambda:
